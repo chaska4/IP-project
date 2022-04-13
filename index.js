@@ -19,6 +19,9 @@ const bcrypt = require('bcrypt');
 // helps in extracting the body portion of an incoming request stream
 var bodyparser = require('body-parser');
 
+// required for reading XML files
+var xml2js = require('xml2js');
+
 const port = 9015;
 
 // create an express application
