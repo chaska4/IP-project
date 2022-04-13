@@ -1,0 +1,142 @@
+﻿<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+          integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+          crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+          integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+          crossorigin="anonymous"></script>
+  <title>My Contacts</title>
+</head>
+<body>
+    <nav class="navbar navbar-expanded navbar-light bg-light mb-5">
+      <ul class="nav nav-pills">
+        <li class="nav-item active">
+          <a class="nav-link active" href="/Home">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href=
+                    "/AllContacts">All Contacts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href=
+                    "/MyContacts">My Contacts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/AddContact">Add
+            Contact</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href=
+                    "/Stocks">Stocks Page</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href=
+                    "/logout">LOG OUT</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="row">
+      <div class="col-md-1"></div>
+      <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-body"><center>Welcome to Stock Page</center></div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table class="table table-bordered table-hover">
+                    <tbody>
+                        <tr>
+                            <td class="col-md-6">Company</td>
+                            <td class="col-md-6">
+                                <div class="form-group">
+                                    <select id="sym" name="Company">
+                                        <option value="MSFT">Microsoft</option>
+                                        <option value="BA">Boeing Company</option>
+                                        <option value="AAPL">Apple Inc</option>
+                                        <option value="AMZN">Amazon</option>
+                                        <option value="NVDA">NVIDIA Corporation</option>
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <button type="button" onclick="getData()">Get Data</button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <table class="table" id="StockData">
+                <thead>
+                    <tr>
+                        <th scope="col">Company-MetaData</th>
+                        <th scope="col">Stock-Info</th>
+
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+      </div>
+      <div class="col-md-1"></div>
+    </div>
+
+
+    <script>
+        // TODO: Add Ajax call to Alphavantage TIME_SERRIES_DAILY
+        // TODO: Show the data in textarea tags
+	var metaCell; 
+	var stockCell;
+
+	function setupPage(){
+          var table = document.getElementById('StockData');
+          table.innerHTML = '<thead><tr><th scope="col" >Company-MetaData</th><th scope="col" >Stock-Info</th></tr></thead>';
+          var row = table.insertRow(-1); // create row for textareas 
+          metaCell = row.insertCell(0); // left will be metaInfo
+          stockCell = row.insertCell(1); // right will be stockCell
+        }
+
+	function getData(){
+	  var xmlhttp = new XMLHttpRequest();
+	  var symbol = document.getElementById('sym').value;
+	  var url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+symbol+"&interval=5min&outputsize=compact&apikey=JZ43SLQ8F9QXUE9R";
+
+	  xmlhttp.onreadystatechange = function() {
+	    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+	      var stockArr = JSON.parse(xmlhttp.responseText);
+	      setupPage();
+	      updatePage(stockArr);
+	    }
+	  }
+
+	  xmlhttp.open("GET", url, true);
+	  xmlhttp.send();
+	}
+
+	function updatePage(stockArr) {
+	  var boxStyle = '<textarea style="width:300px; height:300px; overflow:auto; font-family:sans-serif; padding5px;">'
+	  // metaData
+	  var metaData = (stockArr[id='Meta Data']);
+	  metaString = JSON.stringify(metaData, null, 3);
+	  metaCell.innerHTML = boxStyle + metaString + '</textarea>';
+	  // stockInfo
+	  var timeString = "";
+	  var timeSeries = stockArr[id='Time Series (Daily)'];
+	  var timeString = JSON.stringify(timeSeries, null, 3);
+	  stockCell.innerHTML = boxStyle + timeString + '</textarea>';
+	}
+    </script>
+</body>
+</html>
