@@ -389,6 +389,39 @@ app.post('/postUser', function(req, res) {
   res.redirect(302, '/Admin');
 });
 
+app.post('/deleteUser', function(req, res) {
+    post = req.body;
+
+      const dbCon = mysql.createConnection({
+        host: "cse-mysql-classes-01.cse.umn.edu",
+        user: "C4131SN22U81",               // replace with the database user provi>
+        password: "6611",           // replace with the database password provided >
+        database: "C4131SN22U81",           // replace with the database user provi>
+        port: 3306
+      });
+
+      console.log("Attempting database connection");
+      dbCon.connect(function (err) {
+        if (err) {
+            throw err;
+        }
+        
+        var id = post.id;
+
+        console.log("Connected to database!");
+
+        console.log("deleteUser");
+        dbCon.query('DELETE FROM tbl_accounts WHERE acc_id=?', id , function (err, rows) {
+            if (err) {
+                throw err;
+            }
+            console.log("Deleted from User table!");
+
+        });
+      });
+  res.redirect(302, '/Admin');
+});
+
 app.post('/upload', (req, res, next) => {
   const form = formidable({multiples: true});
   let userJson = {};
