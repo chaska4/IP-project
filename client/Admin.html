@@ -158,6 +158,21 @@
           }
             }
     }
+    
+    function editUser() {
+	$('#accountTable').on('click', '.updateButton', function(){
+                          var thisRow = $(this).closest('tr');
+                          $('#showerror').html(""); // clear error message
+                          var name = thisRow.find(".name").text();
+                          var login = thisRow.find(".login").text();
+                          var password = thisRow.find(".password").text();
+                          var formData = {"name" : name, "login" : login, "password" : password};
+                          let xhr = new XMLHttpRequest();  
+                          xhr.open('POST', "http://localhost:9015/updateUser", true);
+                          xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                          xhr.send(JSON.stringify(formData));
+                      });
+    }
 
     function formTable() {
       //$('#categorys li a').removeClass("active");
@@ -180,28 +195,53 @@
 			      let entry = jArray[i];
 			      newRow += "<tr>";
 			      newRow += "<td class='id'>" + entry.id + "</td>";
-			      newRow += "<td>" + entry.name + "</td>";
-			      newRow += "<td>" + entry.login + "</td>";
-			      newRow += "<td>" + "</td>";
-			      newRow += "<td>" + '<button type="button" onclick="edit()"><i data-feather="edit-2"></i></button>'
-						+ '<button type="button" class= "deleteButton" onclick="delete()"><i data-feather="trash-2"></i></button>'
-						+ '<button type="button" onclick="switch()"><i data-feather="play"></i></button>' + "</td>";
+			      newRow += "<td class='name'>" + entry.name + "</td>";
+			      newRow += "<td class='login'>" + entry.login + "</td>";
+			      newRow += "<td class='password'>" + "</td>";
+			      newRow += "<td class='actions'>" + '<button type="button" class="editButton"><i data-feather="edit-2"></i></button>'
+						+ '<button type="button" class="deleteButton"><i data-feather="trash-2"></i></button>'
+						+ '<button type="button" class="switchButton"><i data-feather="play"></i></button>' + "</td>";
 			      newRow += "</tr>"; 
 		      }
-		      document.querySelector("tbody").innerHTML = newRow;
+		      document.querySelector("tbody").outerHTML = newRow;
 		      $('#accountTable').on('click', '.deleteButton', function(){
-                        if (true) {
                           var thisRow = $(this).closest('tr');
-                          var id = thisRow.find(".id").text();
-                          var formData = {"id" : id};
-                          let xhr = new XMLHttpRequest();
-                          xhr.open('POST', "http://localhost:9015/deleteUser", true);
-                          xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                          xhr.send(JSON.stringify(formData));
-                          thisRow.remove();
-                        } else {
-                          $('#showerror').html("Error: Cannot delete logged in User");
-                        }
+			  var rowLogin = thisRow.find(".login").text();
+			  var welcomeLogin = document.getElementById("displayUser").textContent;
+			  if (("Welcome " + rowLogin + "!") != (welcomeLogin)) {
+			    $('#showerror').html(""); // clear error message
+                            var id = thisRow.find(".id").text();
+                            var formData = {"id" : id};
+                            let xhr = new XMLHttpRequest();
+                            xhr.open('POST', "http://localhost:9015/deleteUser", true);
+                            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                            xhr.send(JSON.stringify(formData));
+                            thisRow.remove();
+                          } else {
+                            $('#showerror').html("<p style='color:red; text-align:center;'><b>Error: Cannot delete logged in User!<b></p>");
+                          }
+                      });
+		      $('#accountTable').on('click', '.editButton', function(){
+                          var thisRow = $(this).closest('tr');
+			  var origRow = thisRow.html();
+                          $('#showerror').html(""); // clear error message
+			  var nameElem = thisRow.find(".name");
+			  var loginElem = thisRow.find(".login");
+			  var passwordElem = thisRow.find(".password");
+			  var actionsMenu = thisRow.find(".actions");
+                          var name = nameElem.text();
+			  var login = loginElem.text();
+			  nameElem.html('<input type="text" class="editName" id="Name" name="name" value="' + name + '">');
+			  loginElem.html('<input type="text" class="editLogin" id="Username" name="login" value="' + login + '">');
+			  passwordElem.html('<input type="text" class="editPass" id="Password" name="password">');
+			  var newIcons = '<button type="button" class="confirmEdit"><i data-feather="save"></i></button>'
+					 + '<button type="button" class="discardEdit"><i data-feather="refresh-cw"></i></button>';
+			  actionsMenu.html(newIcons);
+			  $('#accountTable').on('click', '.discardEdit', function(){
+			      var thisRow = $(this).closest('tr');
+			      thisRow.html(origRow);
+			  });
+			  feather.replace();
                       });
 		      feather.replace();
     	  }

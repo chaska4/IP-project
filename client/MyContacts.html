@@ -46,6 +46,7 @@
                     "/logout">LOG OUT</a>
         </li>
       </ul>
+      <a href="" id="displayUser"></a>
     </nav>
     <div class="container mb-5">
       <div class="alert alert-secondary" role="alert">
@@ -84,6 +85,22 @@
       </div>
     </div>
     <script>
+    function displayUser() {
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', "http://localhost:9015/getSession", true);
+        xhr.setRequestHeader("Content-Type", "text/html;charset=UTF-8");
+        xhr.send();
+
+        xhr.onreadystatechange = processRequest;
+
+        function processRequest(e) {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+          let response = xhr.responseText;
+                      document.getElementById("displayUser").textContent = "Welcome " + response + "!";
+          }
+            }
+    }
+
     function formTable(element) {
       $('#categorys li a').removeClass("active");
       $(element).addClass("active");
@@ -129,7 +146,7 @@
     }
 
 	  formTable('.nav-item');
-
+	  displayUser();
     function clearTable() {
       $('#contactTable tbody').empty();
     }

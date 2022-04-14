@@ -45,6 +45,7 @@
                     "/logout">LOG OUT</a>
         </li>
       </ul>
+      <a href="" id="displayUser"></a>
     </nav>
 
     <div class="row">
@@ -141,6 +142,24 @@
 	  var timeString = JSON.stringify(timeSeries, null, 3);
 	  stockCell.innerHTML = boxStyle + timeString + '</textarea>';
 	}
+
+	function displayUser() {
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', "http://localhost:9015/getSession", true);
+        xhr.setRequestHeader("Content-Type", "text/html;charset=UTF-8");
+        xhr.send();
+
+        xhr.onreadystatechange = processRequest;
+
+        function processRequest(e) {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+          let response = xhr.responseText;
+                      document.getElementById("displayUser").textContent = "Welcome " + response + "!";
+          }
+            }
+    }
+
+	displayUser();
     </script>
 </body>
 </html>
