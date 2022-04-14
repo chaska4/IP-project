@@ -148,9 +148,11 @@ app.post('/validate',function(req, res) {
             if (matchPass && matchUser) {
               console.log("Successful authentication! Session being created.");
               req.session.value = 1;
+	      req.session.user = formUser;
 	      res.json({status: 'success'});
             } else {
 	      req.session.value += 1;
+	      req.session.user = "";
 	      res.json({status: 'fail'});
             }
 	  }
@@ -204,6 +206,10 @@ app.post('/validateUser',function(req, res) {
 
     });
    });
+});
+
+app.get('/getSession', function(req, res) {
+    res.send(req.session.user);
 });
 
 app.get('/getContacts', function(req, res) {
