@@ -57,6 +57,14 @@ app.get('/Home',function(req, res) {
   }
 });
 
+app.get('/Admin',function(req, res) {
+  if (!req.session.value) {
+    res.redirect(302, '/login');
+  } else {
+    res.sendFile(__dirname + '/client/Admin.html');
+  }
+});
+
 // GET method route for the contacts page.
 // It serves MyContacts.html present in client folder
 app.get('/MyContacts', function(req, res) {
@@ -132,16 +140,20 @@ app.post('/validate',function(req, res) {
             throw err;
         }
 	if (rows.length > 0) {
-        var accPass = rows[0].acc_password;
-        var match = bcrypt.compareSync(formPass, accPass);
-        if (match) {
-          console.log("Successful authentication! Session being created.");
-          req.session.value = 1;
-	  res.json({status: 'success'});
-        } else {
-	  req.session.value += 1;
-	  res.json({status: 'fail'});
-        }
+	  for (const row of rows) {
+	    var accLogin = row.acc_login;
+	    var accPass = row.acc_password;
+	    var matchUser = (accLogin == formUser);
+            var matchPass = bcrypt.compareSync(formPass, accPass);
+            if (matchPass && matchUser) {
+              console.log("Successful authentication! Session being created.");
+              req.session.value = 1;
+	      res.json({status: 'success'});
+            } else {
+	      req.session.value += 1;
+	      res.json({status: 'fail'});
+            }
+	  }
 	} else {
 	    res.json({status: 'fail'});
 	}
@@ -212,6 +224,47 @@ app.get('/getContacts', function(req, res) {
    });
 });
 
+app.get('/getAccounts', function(req, res) {
+  const dbCon = mysql.createConnection({
+    host: "cse-mysql-classes-01.cse.umn.edu",
+    user: "C4131SN22U81",               // replace with the database user provi>
+    password: "6611",           // replace with the database password provided >
+    database: "C4131SN22U81",           // replace with the database user provi>
+    port: 3306
+  });
+
+  console.log("Attempting database connection");
+  dbCon.connect(function (err) {
+    if (err) {
+        throw err;
+    }
+
+    console.log("Connected to database!");
+
+    console.log("getAccounts");
+    dbCon.query('SELECT * FROM tbl_accounts', function(err, rows) {
+        if (err) {
+            throw err;
+        }
+        if (rows.length > 0) {
+	  var accArr = [];
+          for (const row of rows) {
+              var account = {
+                "id" : row.acc_id,
+                "name" : row.acc_name,
+                "login" : row.acc_login,
+              }; 
+              accArr.push(account);
+          }
+          res.json(accArr);
+        } else {
+          res.json({status: 'fail'});
+        }
+
+    });
+   });
+});
+
 app.post('/postContactEntry', function(req, res) {
     post = req.body;
 
@@ -251,6 +304,45 @@ app.post('/postContactEntry', function(req, res) {
         });
       });
   res.redirect(302, '/AllContacts');
+});
+
+app.post('/postUser', function(req, res) {
+    post = req.body;
+
+      const dbCon = mysql.createConnection({
+        host: "cse-mysql-classes-01.cse.umn.edu",
+        user: "C4131SN22U81",               // replace with the database user provi>
+        password: "6611",           // replace with the database password provided >
+        database: "C4131SN22U81",           // replace with the database user provi>
+        port: 3306
+      });
+
+      console.log("Attempting database connection");
+      dbCon.connect(function (err) {
+        if (err) {
+            throw err;
+        }
+
+	const passwordHash = bcrypt.hashSync(post.password, 10);
+        
+        const rowToBeInserted = {
+          acc_name: post.name,           // replace with acc_login chosen by you OR retain the same value
+          acc_login: post.login,
+	  acc_password: passwordHash
+        };
+
+        console.log("Connected to database!");
+
+        console.log("insertUser");
+        dbCon.query('INSERT tbl_accounts SET ?', rowToBeInserted , function (err, rows) {
+            if (err) {
+                throw err;
+            }
+            console.log("Inserted into User table!");
+
+        });
+      });
+  res.redirect(302, '/Admin');
 });
 
 app.post('/upload', (req, res, next) => {

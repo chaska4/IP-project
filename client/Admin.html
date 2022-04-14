@@ -13,13 +13,30 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
             integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
             crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+       <style>.table td {
+   		text-align: center;   
+		}
+		.table th {
+                text-align: center;
+                }
+		button {
+		padding-horizontal:10px;
+		border:none;
+		background: transparent;
+		}
+	</style>
     <title>My Contacts</title>
   </head>
   <body>
     <nav class="navbar navbar-expanded navbar-light bg-light mb-5">
       <ul class="nav nav-pills">
-        <li class="nav-item active">
-          <a class="nav-link active" href="/Home">Home</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/Home">Home</a>
+        </li>
+	<li class="nav-item active">
+          <a class="nav-link active" href=
+                    "/Admin">Admin Page</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href=
@@ -44,10 +61,14 @@
       </ul>
     </nav>
     <div class="container mb-3">
+	<br><br><br>
+      <button type="button" class="btn btn-outline-secondary btn-sm" style="color:black;" onclick="addUser()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+  	<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+	</svg>Add User</button>
       <br>
       <br>
-      <div class="container">
-	<table class="table table-bordered table-sm" id="contactTable">
+	<form id= "checkAdd" name="checkAdd" method="post" action="/postUser">
+	<table class="table table-bordered table-sm" id="accountTable">
   	  <thead>
     	      <tr style="background-color:#007bff; color: white;">
       		<th scope="col">Id</th>
@@ -57,36 +78,35 @@
 		<th scope="col"></th>
     	     </tr>
   	  </thead>
-  	<tbody>
-    <tr>
-      <th>1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>Larry the Bird</td>
-      <td>@twitter</td>
-    </tr>
-  	</tbody>
+  	<tbody></tbody>
 	</table>
-      </div>
+	</form>
     </div>
     <script>
+
+    function addUser() {
+	var newUser = "<tr>";
+	newUser += "<td></td>";
+	newUser += '<td><input type="text" id="Name" name="name"></td>';
+	newUser += '<td><input type="text" id="Username" name="login"></td>';
+	newUser += '<td><input type="password" id="Password" name="password"></td>';
+	newUser += '<td><button><i data-feather="save"></i></button>';
+	newUser += '<button class="cancelButton"><i data-feather="x"></i></button></td>';
+	newUser += "</tr>";
+	$('#accountTable tr:last').after(newUser);
+	$('#accountTable').on('click', '.cancelButton', function(){
+            $(this).closest('tr').remove();
+      	});
+	feather.replace();
+    }
+
     function formTable() {
       //$('#categorys li a').removeClass("active");
       //$(element).addClass("active");
       //clearTable();
       //TODO: Make request and fill table with events for the day
 	    let xhr = new XMLHttpRequest();
-	    xhr.open('GET', "http://localhost:9015/getContacts", true);
+	    xhr.open('GET', "http://localhost:9015/getAccounts", true);
 	    xhr.send();
 
 	    xhr.onreadystatechange = processRequest;
@@ -96,25 +116,26 @@
           let response = JSON.parse(xhr.responseText);
 		      let newRow = "";
 		      let jArray = [];
-            	      jArray = response.all;
+            	      jArray = response;
 		      for (var i = 0; i < jArray.length; i++) {
 			      let entry = jArray[i];
 			      newRow += "<tr>";
-			      newRow += "<td>" + entry.category + "</td>";
+			      newRow += "<td>" + entry.id + "</td>";
 			      newRow += "<td>" + entry.name + "</td>";
-			      newRow += "<td>" + entry.location + "</td>";
-			      newRow += "<td>" + entry.info + "</td>";
-			      newRow += "<td>" + entry.email + "</td>";
-			      newRow += "<td>" + '<a href="' + entry.url + '">' + entry.website_title + "</a>" + "</td>";
+			      newRow += "<td>" + entry.login + "</td>";
+			      newRow += "<td>" + "</td>";
+			      newRow += "<td>" + '<button type="button" onclick="edit()"><i data-feather="edit-2"></i></button>'
+						+ '<button type="button" onclick="delete()"><i data-feather="trash-2"></i></button>'
+						+ '<button type="button" onclick="switch()"><i data-feather="play"></i></button>' + "</td>";
 			      newRow += "</tr>"; 
 		      }
 		      document.querySelector("tbody").innerHTML = newRow;
+		      feather.replace();
     	  }
 	    }
     }
 
-	  //formTable();
-
+	  formTable();
     </script>
   </body>
 </html>
