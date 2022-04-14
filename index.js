@@ -162,6 +162,50 @@ app.post('/validate',function(req, res) {
    });
 });
 
+app.post('/validateUser',function(req, res) {
+  var formUser = req.body.username;
+  var formPass = req.body.password;
+
+  // Connection
+  const dbCon = mysql.createConnection({
+    host: "cse-mysql-classes-01.cse.umn.edu",
+    user: "C4131SN22U81",               // replace with the database user provi>
+    password: "6611",           // replace with the database password provided >
+    database: "C4131SN22U81",           // replace with the database user provi>
+    port: 3306
+  });
+
+  console.log("Attempting database connection");
+  dbCon.connect(function (err) {
+    if (err) {
+        throw err;
+    }
+
+    console.log("Connected to database!");
+
+    console.log("getAccount");
+    dbCon.query('SELECT * FROM tbl_accounts WHERE acc_login = ?', formUser , function (err, rows) {
+        if (err) {
+            throw err;
+        }
+        if (rows.length > 0) {
+          for (const row of rows) {
+            var accLogin = row.acc_login;
+            var matchUser = (accLogin == formUser);
+            if (matchUser) {
+              res.json({status: 'fail'});
+            } else {
+              res.json({status: 'success'});
+            }
+          }
+        } else {
+            res.json({status: 'success'});
+        }
+
+    });
+   });
+});
+
 app.get('/getContacts', function(req, res) {
   const dbCon = mysql.createConnection({
     host: "cse-mysql-classes-01.cse.umn.edu",
@@ -322,8 +366,8 @@ app.post('/postUser', function(req, res) {
         if (err) {
             throw err;
         }
-
-	const passwordHash = bcrypt.hashSync(post.password, 10);
+	const saltRounds = 10;
+	const passwordHash = bcrypt.hashSync(post.password, saltRounds);
         
         const rowToBeInserted = {
           acc_name: post.name,           // replace with acc_login chosen by you OR retain the same value

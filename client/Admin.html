@@ -61,13 +61,13 @@
       </ul>
     </nav>
     <div class="container mb-3">
-	<br><br><br>
+	<br><div id="showerror"></div><br><br>
       <button type="button" class="btn btn-outline-secondary btn-sm" style="color:black;" onclick="addUser()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
   	<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
 	</svg>Add User</button>
       <br>
       <br>
-	<form id= "checkAdd" name="checkAdd" method="post" action="/postUser">
+	<form id= "checkAdd" name="checkAdd" method="post" action="/validateUser">
 	<table class="table table-bordered table-sm" id="accountTable">
   	  <thead>
     	      <tr style="background-color:#007bff; color: white;">
@@ -99,6 +99,48 @@
       	});
 	feather.replace();
     }
+
+    $('#checkAdd').submit(function (event) {
+          event.preventDefault();
+          //collect the form data using Id Selector for whatever data you need to send to the server
+	  let name = $('#Name').val();
+          let username= $('#Username').val();
+          let password= $('#Password').val();
+	  var errMsg = "<p style='color:red; text-align:center;'><b>Error: missing required information.<b><br>";
+	  var origMsg = errMsg;
+
+          // post to server
+
+	  if (name == "") {
+	     errMsg += "<b>Name field is required.<b><br>";
+	  } else if (username == "") {
+	     errMsg += "<b>Login field is required.<b><br>";
+	  } else if (password == "") {
+	     errMsg += "<b>Password field is required.<b><br>";
+	  } 
+	  if (name && username && password) {
+            $.post('/validateUser', {"username": username, "password": password},
+              (data) => {
+                  console.log(data);
+                if (data.status === 'success') {
+		  var formData = { "name" : name, "login" : username, "password" : password };
+		  //var formData = JSON.parse(text);
+		  let xhr = new XMLHttpRequest();
+                  xhr.open('POST', "http://localhost:9015/postUser", true);
+		  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                  xhr.send(JSON.stringify(formData));
+                  window.location.href = '/Admin';
+              } else {
+                //display error message
+                console.log("ERROR");
+		errMsg = "<p style='color:red; text-align:center;'><b>Error: this user already exists.<br>Try a different login.<b></p>";
+		$('#showerror').html(errMsg);
+              }
+            });
+	  } else {
+            $('#showerror').html(errMsg);
+	  }
+        }); 
 
     function formTable() {
       //$('#categorys li a').removeClass("active");
