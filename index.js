@@ -21,6 +21,7 @@ var bodyparser = require('body-parser');
 
 // required for reading XML files
 var xml2js = require('xml2js');
+var parser = new xml2js.Parser();
 
 const port = 9015;
 
@@ -124,6 +125,19 @@ app.post('/validate',function(req, res) {
     password: "6611",           // replace with the database password provided >
     database: "C4131SN22U81",           // replace with the database user provi>
     port: 3306
+  });// Connection
+  var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
+  const dbCon = mysql.createConnection({
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
   });
 
   console.log("Attempting database connection");
@@ -162,6 +176,8 @@ app.post('/validate',function(req, res) {
 
     });
    });
+  }); 
+ });
 });
 
 app.post('/validateUser',function(req, res) {
@@ -169,12 +185,18 @@ app.post('/validateUser',function(req, res) {
   var formPass = req.body.password;
 
   // Connection
+  var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
   const dbCon = mysql.createConnection({
-    host: "cse-mysql-classes-01.cse.umn.edu",
-    user: "C4131SN22U81",               // replace with the database user provi>
-    password: "6611",           // replace with the database password provided >
-    database: "C4131SN22U81",           // replace with the database user provi>
-    port: 3306
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
   });
 
   console.log("Attempting database connection");
@@ -206,6 +228,8 @@ app.post('/validateUser',function(req, res) {
 
     });
    });
+  }); 
+ });
 });
 
 app.get('/getSession', function(req, res) {
@@ -213,12 +237,18 @@ app.get('/getSession', function(req, res) {
 });
 
 app.get('/getContacts', function(req, res) {
+  var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
   const dbCon = mysql.createConnection({
-    host: "cse-mysql-classes-01.cse.umn.edu",
-    user: "C4131SN22U81",               // replace with the database user provi>
-    password: "6611",           // replace with the database password provided >
-    database: "C4131SN22U81",           // replace with the database user provi>
-    port: 3306
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
   });
 
   console.log("Attempting database connection");
@@ -272,15 +302,23 @@ app.get('/getContacts', function(req, res) {
 
     });
    });
+   });
+  });
 });
 
 app.get('/getAccounts', function(req, res) {
+  var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
   const dbCon = mysql.createConnection({
-    host: "cse-mysql-classes-01.cse.umn.edu",
-    user: "C4131SN22U81",               // replace with the database user provi>
-    password: "6611",           // replace with the database password provided >
-    database: "C4131SN22U81",           // replace with the database user provi>
-    port: 3306
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
   });
 
   console.log("Attempting database connection");
@@ -313,18 +351,26 @@ app.get('/getAccounts', function(req, res) {
 
     });
    });
+  }); 
+ });
 });
 
 app.post('/postContactEntry', function(req, res) {
     post = req.body;
 
-      const dbCon = mysql.createConnection({
-        host: "cse-mysql-classes-01.cse.umn.edu",
-        user: "C4131SN22U81",               // replace with the database user provi>
-        password: "6611",           // replace with the database password provided >
-        database: "C4131SN22U81",           // replace with the database user provi>
-        port: 3306
-      });
+	var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
+  const dbCon = mysql.createConnection({
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
+  });
 
       console.log("Attempting database connection");
       dbCon.connect(function (err) {
@@ -353,19 +399,27 @@ app.post('/postContactEntry', function(req, res) {
 
         });
       });
+   }); 
+  });
   res.redirect(302, '/AllContacts');
 });
 
 app.post('/postUser', function(req, res) {
     post = req.body;
 
-      const dbCon = mysql.createConnection({
-        host: "cse-mysql-classes-01.cse.umn.edu",
-        user: "C4131SN22U81",               // replace with the database user provi>
-        password: "6611",           // replace with the database password provided >
-        database: "C4131SN22U81",           // replace with the database user provi>
-        port: 3306
-      });
+	var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
+  const dbCon = mysql.createConnection({
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
+  });
 
       console.log("Attempting database connection");
       dbCon.connect(function (err) {
@@ -392,19 +446,27 @@ app.post('/postUser', function(req, res) {
 
         });
       });
+    }); 
+  });
   res.redirect(302, '/Admin');
 });
 
 app.post('/updateUser', function(req, res) {
     post = req.body;
 
-      const dbCon = mysql.createConnection({
-        host: "cse-mysql-classes-01.cse.umn.edu",
-        user: "C4131SN22U81",               // replace with the database user provi>
-        password: "6611",           // replace with the database password provided >
-        database: "C4131SN22U81",           // replace with the database user provi>
-        port: 3306
-      });
+	var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
+  const dbCon = mysql.createConnection({
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
+  });
 
       console.log("Attempting database connection");
       dbCon.connect(function (err) {
@@ -429,22 +491,30 @@ app.post('/updateUser', function(req, res) {
             }
             console.log("Updated User table!");
 
-        });
+            });
 	}
       });
+   }); 
+   });
   res.redirect(302, '/Admin');
 });
 
 app.post('/deleteUser', function(req, res) {
     post = req.body;
 
-      const dbCon = mysql.createConnection({
-        host: "cse-mysql-classes-01.cse.umn.edu",
-        user: "C4131SN22U81",               // replace with the database user provi>
-        password: "6611",           // replace with the database password provided >
-        database: "C4131SN22U81",           // replace with the database user provi>
-        port: 3306
-      });
+	var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
+  const dbCon = mysql.createConnection({
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
+  });
 
       console.log("Attempting database connection");
       dbCon.connect(function (err) {
@@ -465,6 +535,8 @@ app.post('/deleteUser', function(req, res) {
 
         });
       });
+    }); 
+  });
   res.redirect(302, '/Admin');
 });
 
@@ -496,13 +568,19 @@ app.post('/upload', (req, res, next) => {
       allContacts.push(persArr);
 
 
-      const dbCon = mysql.createConnection({
-        host: "cse-mysql-classes-01.cse.umn.edu",
-        user: "C4131SN22U81",               // replace with the database user provi>
-        password: "6611",           // replace with the database password provided >
-        database: "C4131SN22U81",           // replace with the database user provi>
-        port: 3306
-      });
+	var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
+  const dbCon = mysql.createConnection({
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
+  });
 
       console.log("Attempting database connection");
       dbCon.connect(function (err) {
@@ -543,6 +621,8 @@ app.post('/upload', (req, res, next) => {
         });
 	}
 	}
+      });
+      });
       });
     });
     res.redirect(302, '/AllContacts');
