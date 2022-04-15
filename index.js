@@ -180,6 +180,62 @@ app.post('/validate',function(req, res) {
  });
 });
 
+app.post('/validateUserEdit',function(req, res) {
+  var formUser = req.body.username;
+  var formPass = req.body.password;
+
+  // Connection
+  var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
+  const dbCon = mysql.createConnection({
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
+  });
+
+  console.log("Attempting database connection");
+  dbCon.connect(function (err) {
+    if (err) {
+        throw err;
+    }
+
+    console.log("Connected to database!");
+
+    console.log("getAccount");
+    dbCon.query('SELECT * FROM tbl_accounts WHERE acc_login = ?', formUser , function (err, rows) {
+        if (err) {
+            throw err;
+        }
+        if (rows.length > 0) {
+	  var numMatches = 0;
+          for (const row of rows) {
+            var accLogin = row.acc_login;
+            var matchUser = (accLogin == formUser);
+            if (matchUser) {
+	      numMatches++;
+	    }
+          }
+	  if (numMatches > 1) {
+	      res.json({status: 'fail'});
+          } else {
+              res.json({status: 'success'});
+            }
+        } else {
+            res.json({status: 'success'});
+        }
+
+    });
+   });
+  }); 
+ });
+});
+
 app.post('/validateUser',function(req, res) {
   var formUser = req.body.username;
   var formPass = req.body.password;

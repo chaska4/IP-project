@@ -244,7 +244,7 @@
                                    errMsg += "<b>Login field is required.<b><br>";
                                 }
 				if (errMsg == origMsg) {
-                                $.post('/validateUser', {"username": username, "password": password},
+                                $.post('/validateUserEdit', {"username": username, "password": password},
                                 (data) => {
                                 console.log(data);
                                 if (data.status === 'success') {
