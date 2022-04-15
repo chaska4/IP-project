@@ -238,7 +238,6 @@
 					 + '<button type="button" class="discardEdit"><i data-feather="refresh-cw"></i></button>';
 			  actionsMenu.html(newIcons);
 			  $('#accountTable').on('click', '.discardEdit', function(){
-			      var thisRow = $(this).closest('tr');
 			      thisRow.html(origRow);
 			  });
 			  feather.replace();
