@@ -114,9 +114,11 @@
 
 	  if (name == "") {
 	     errMsg += "<b>Name field is required.<b><br>";
-	  } else if (username == "") {
+	  }
+	  if (username == "") {
 	     errMsg += "<b>Login field is required.<b><br>";
-	  } else if (password == "") {
+	  }
+	  if (password == "") {
 	     errMsg += "<b>Password field is required.<b><br>";
 	  } 
 	  if (name && username && password) {
@@ -224,13 +226,24 @@
 					 + '<button type="button" class="discardEdit"><i data-feather="refresh-cw"></i></button>';
 			  actionsMenu.html(newIcons);
 			  $('#accountTable').on('click', '.discardEdit', function(){
+			      $('#showerror').html(""); // clear error message
 			      thisRow.html(origRow);
 			  });
 			  feather.replace();
 			$('#accountTable').on('click', '.confirmEdit', function(){
 				var thisRow = $(this).closest('tr');
+				var name = thisRow.find(".editName").val();
                                 var username = thisRow.find(".editLogin").val();
                                 var password = thisRow.find(".editPassword").val();
+				var errMsg = "<p style='color:red; text-align:center;'><b>Error: missing required information.<b><br>";
+				var origMsg = errMsg;
+				if (name == "") {
+                                   errMsg += "<b>Name field is required.<b><br>";
+                                }
+				if (username == "") {
+                                   errMsg += "<b>Login field is required.<b><br>";
+                                }
+				if (errMsg == origMsg) {
                                 $.post('/validateUser', {"username": username, "password": password},
                                 (data) => {
                                 console.log(data);
@@ -248,12 +261,13 @@
                                         xhr.send(JSON.stringify(formData));
                                         window.location.href = '/Admin';
                                 } else {
-                                //display error message
-                                console.log("ERROR");
-                                errMsg = "<p style='color:red; text-align:center;'><b>Error: This login is used by another user<b></p>";
-                                $('#showerror').html(errMsg);
+                                	errMsg = "<p style='color:red; text-align:center;'><b>Error: This login is used by another user<b>";
+					$('#showerror').html(errMsg + "</p>");
                                 }
                                 });
+				} else {
+					$('#showerror').html(errMsg + "</p>");
+				}
 			
 			 });
                       });
