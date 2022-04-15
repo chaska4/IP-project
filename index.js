@@ -395,6 +395,46 @@ app.post('/postUser', function(req, res) {
   res.redirect(302, '/Admin');
 });
 
+app.post('/updateUser', function(req, res) {
+    post = req.body;
+
+      const dbCon = mysql.createConnection({
+        host: "cse-mysql-classes-01.cse.umn.edu",
+        user: "C4131SN22U81",               // replace with the database user provi>
+        password: "6611",           // replace with the database password provided >
+        database: "C4131SN22U81",           // replace with the database user provi>
+        port: 3306
+      });
+
+      console.log("Attempting database connection");
+      dbCon.connect(function (err) {
+        if (err) {
+            throw err;
+        }
+        const saltRounds = 10;
+	var passwordHash;
+	if (post.password != "") {
+            passwordHash = bcrypt.hashSync(post.password, saltRounds);
+	    dbCon.query('UPDATE tbl_accounts SET acc_name=?, acc_login=?, acc_password=? WHERE acc_id =?', [post.name, post.login, passwordHash, post.id], function (err, rows) {
+            if (err) {
+                throw err;
+            }
+            console.log("Updated User table!");
+
+            });
+        } else {
+	    dbCon.query('UPDATE tbl_accounts SET acc_name=?, acc_login=? WHERE acc_id =?', [post.name, post.login, post.id], function (err, rows) {
+            if (err) {
+                throw err;
+            }
+            console.log("Updated User table!");
+
+        });
+	}
+      });
+  res.redirect(302, '/Admin');
+});
+
 app.post('/deleteUser', function(req, res) {
     post = req.body;
 

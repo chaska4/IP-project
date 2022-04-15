@@ -159,21 +159,6 @@
             }
     }
     
-    function editUser() {
-	$('#accountTable').on('click', '.updateButton', function(){
-                          var thisRow = $(this).closest('tr');
-                          $('#showerror').html(""); // clear error message
-                          var name = thisRow.find(".name").text();
-                          var login = thisRow.find(".login").text();
-                          var password = thisRow.find(".password").text();
-                          var formData = {"name" : name, "login" : login, "password" : password};
-                          let xhr = new XMLHttpRequest();  
-                          xhr.open('POST', "http://localhost:9015/updateUser", true);
-                          xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                          xhr.send(JSON.stringify(formData));
-                      });
-    }
-
     function formTable() {
       //$('#categorys li a').removeClass("active");
       //$(element).addClass("active");
@@ -231,9 +216,10 @@
 			  var actionsMenu = thisRow.find(".actions");
                           var name = nameElem.text();
 			  var login = loginElem.text();
+			  var password = passwordElem.text();
 			  nameElem.html('<input type="text" class="editName" id="Name" name="name" value="' + name + '">');
 			  loginElem.html('<input type="text" class="editLogin" id="Username" name="login" value="' + login + '">');
-			  passwordElem.html('<input type="text" class="editPass" id="Password" name="password">');
+			  passwordElem.html('<input type="text" class="editPassword" id="Password" name="password">');
 			  var newIcons = '<button type="button" class="confirmEdit"><i data-feather="save"></i></button>'
 					 + '<button type="button" class="discardEdit"><i data-feather="refresh-cw"></i></button>';
 			  actionsMenu.html(newIcons);
@@ -241,12 +227,40 @@
 			      thisRow.html(origRow);
 			  });
 			  feather.replace();
+			$('#accountTable').on('click', '.confirmEdit', function(){
+				var thisRow = $(this).closest('tr');
+                                var username = thisRow.find(".editLogin").val();
+                                var password = thisRow.find(".editPassword").val();
+                                $.post('/validateUser', {"username": username, "password": password},
+                                (data) => {
+                                console.log(data);
+                                if (data.status === 'success') {
+                                        var thisRow = $(this).closest('tr');
+                                        $('#showerror').html(""); // clear error message
+                                        var name = thisRow.find(".editName").val();
+                                        var login = thisRow.find(".editLogin").val();
+                                        var password = thisRow.find(".editPassword").val();
+                                        var id = thisRow.find(".id").text();
+                                        var formData = {"name" : name, "login" : login, "password" : password, "id" : id};
+                                        let xhr = new XMLHttpRequest();
+                                        xhr.open('POST', "http://localhost:9015/updateUser", true);
+                                        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                                        xhr.send(JSON.stringify(formData));
+                                        window.location.href = '/Admin';
+                                } else {
+                                //display error message
+                                console.log("ERROR");
+                                errMsg = "<p style='color:red; text-align:center;'><b>Error: This login is used by another user<b></p>";
+                                $('#showerror').html(errMsg);
+                                }
+                                });
+			
+			 });
                       });
 		      feather.replace();
     	  }
 	    }
     }
-
 	  formTable();
 	  displayUser();
     </script>
