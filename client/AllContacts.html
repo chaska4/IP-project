@@ -13,6 +13,14 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
             integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
             crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+	button {
+                padding-horizontal:10px;
+                border:none;
+                background: transparent;
+        }
+    </style>
     <title>My Contacts</title>
   </head>
   <body>
@@ -46,6 +54,7 @@
                     "/logout">LOG OUT</a>
         </li>
       </ul>
+      <button onclick="exportContacts()" style="margin-left:23px; margin-right:auto;"><i data-feather="download"></i></button>
       <a href="" id="displayUser"></a>
     </nav>
     <div class="container mb-3">
@@ -117,6 +126,31 @@
 	    }
     }
 
+    function exportContacts() {
+	var fileContent = "data:text/csv;charset=utf-8,";
+	$('table > thead > tr > th').each(function(index, th) {
+           console.log(th.innerHTML);
+	   if (th.nextElementSibling != null) {
+	      fileContent += th.innerHTML + ",";
+	   } else {
+	      fileContent += th.innerHTML;
+	   }
+        });
+	fileContent += "\r\n";
+	$('table > tbody > tr').each(function(index, tr) { 
+	   $(this).find('td').each(function(index, td) {
+              if (td.nextElementSibling != null) {
+		  fileContent += td.textContent + ",";
+	      } else {
+		  fileContent += td.firstChild.href;
+	      }
+	   });
+	   fileContent += "\r\n";
+	});
+	var encodedUri = encodeURI(fileContent);
+	window.open(encodedUri);
+    }
+	  feather.replace();
 	  formTable();
 	  displayUser();
     </script>

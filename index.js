@@ -119,13 +119,6 @@ app.post('/validate',function(req, res) {
   var formPass = req.body.password;
 
   // Connection
-  const dbCon = mysql.createConnection({
-    host: "cse-mysql-classes-01.cse.umn.edu",
-    user: "C4131SN22U81",               // replace with the database user provi>
-    password: "6611",           // replace with the database password provided >
-    database: "C4131SN22U81",           // replace with the database user provi>
-    port: 3306
-  });// Connection
   var dbConfig;
   fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
         if (err) throw err;
@@ -174,6 +167,52 @@ app.post('/validate',function(req, res) {
 	    res.json({status: 'fail'});
 	}
 
+    });
+   });
+  }); 
+ });
+});
+
+app.post('/switchUser',function(req, res) {
+  var formId = req.body.id;
+
+  // Connection
+  var dbConfig;
+  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
+        if (err) throw err;
+        parser.parseString(data, function (err, result) {
+            if (err) throw err;
+            dbConfig = result;
+  const dbCon = mysql.createConnection({
+    host: dbConfig.dbconfig.host[0],
+    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
+    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
+    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
+    port: dbConfig.dbconfig.port[0]
+  });
+
+  console.log("Attempting database connection");
+  dbCon.connect(function (err) {
+    if (err) {
+        throw err;
+    }
+
+    console.log("Connected to database!");
+
+    console.log("getAccount");
+    dbCon.query('SELECT * FROM tbl_accounts WHERE acc_id = ?', formId, function (err, rows) {
+        if (err) {
+            throw err;
+        }
+        if (rows.length > 0) {
+          for (const row of rows) {
+            console.log("Successful authentication! Switching user.");
+            req.session.user = row.acc_login;
+	    res.json({status: 'success'});
+          }
+        } else {
+	    res.json({status: 'fail'});
+	}
     });
    });
   }); 

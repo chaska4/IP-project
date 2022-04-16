@@ -208,6 +208,22 @@
                             $('#showerror').html("<p style='color:red; text-align:center;'><b>Error: Cannot delete logged in User!<b></p>");
                           }
                       });
+                      $('#accountTable').on('click', '.switchButton', function(){
+                            var thisRow = $(this).closest('tr');
+                            $('#showerror').html(""); // clear error message
+                            var id = thisRow.find(".id").text();
+                            //let xhr = new XMLHttpRequest();
+                            //xhr.open('POST', "http://localhost:9015/switchUser", true);
+                            //xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                            //xhr.send(JSON.stringify(formData));
+			    $.post('/switchUser', {"id": id},
+                                (data) => {
+                                    console.log(data);
+                                    if (data.status === 'success') {
+					window.location.href = '/Admin';
+				    }
+			    });
+                      });
 		      $('#accountTable').on('click', '.editButton', function(){
                           var thisRow = $(this).closest('tr');
 			  var origRow = thisRow.html();
