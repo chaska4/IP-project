@@ -126,30 +126,50 @@
 	    }
     }
 
-    function exportContacts() {
-	var fileContent = "data:text/csv;charset=utf-8,";
-	$('table > thead > tr > th').each(function(index, th) {
+function exportContacts() {
+    var fileContent = "";
+    $('table > thead > tr > th').each(function(index, th) {
            console.log(th.innerHTML);
-	   if (th.nextElementSibling != null) {
-	      fileContent += th.innerHTML + ",";
-	   } else {
-	      fileContent += th.innerHTML;
-	   }
+       if (th.nextElementSibling != null) {
+          fileContent += th.innerHTML + ",";
+       } else {
+          fileContent += th.innerHTML;
+       }
         });
-	fileContent += "\r\n";
-	$('table > tbody > tr').each(function(index, tr) { 
-	   $(this).find('td').each(function(index, td) {
+    fileContent += "\r\n";
+    $('table > tbody > tr').each(function(index, tr) {
+       $(this).find('td').each(function(index, td) {
+        console.log(td);
               if (td.nextElementSibling != null) {
-		  fileContent += td.textContent + ",";
-	      } else {
-		  fileContent += td.firstChild.href;
-	      }
-	   });
-	   fileContent += "\r\n";
-	});
-	var encodedUri = encodeURI(fileContent);
-	window.open(encodedUri);
+//        fileContent += td.textContent + ",";
+//        } else if(td.textContent.includes(",")) {
+          fileContent += ('\"'+td.textContent+'\"' +",")
+          } else {
+          fileContent += td.firstChild.href;
+          }
+       });
+       fileContent += "\r\n";
+    });
+    //var encodedUri = encodeURI(fileContent);
+    //window.open(encodedUri);
+    var blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+    if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, "contacts");
+    } else {
+        var link = document.createElement("a");
+        if (link.download !== undefined) { // feature detection
+            // Browsers that support HTML5 download attribute
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "contacts");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     }
+    }
+
 	  feather.replace();
 	  formTable();
 	  displayUser();
