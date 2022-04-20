@@ -248,6 +248,7 @@
 			  feather.replace();
 			$('#accountTable').on('click', '.confirmEdit', function(){
 				var thisRow = $(this).closest('tr');
+				var id = (thisRow.find(".id").text());
 				var name = thisRow.find(".editName").val();
                                 var username = thisRow.find(".editLogin").val();
                                 var password = thisRow.find(".editPassword").val();
@@ -260,7 +261,7 @@
                                    errMsg += "<b>Login field is required.<b><br>";
                                 }
 				if (errMsg == origMsg) {
-                                $.post('/validateUserEdit', {"username": username, "password": password},
+                                $.post('/validateUserEdit', {"username": username, "password": password, "id": id},
                                 (data) => {
                                 console.log(data);
                                 if (data.status === 'success') {

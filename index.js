@@ -21,12 +21,32 @@ var bodyparser = require('body-parser');
 
 // required for reading XML files
 var xml2js = require('xml2js');
+var xmlParser = xml2js.parseString;
 var parser = new xml2js.Parser();
 
 const port = 9015;
 
 // create an express application
 const app = express();
+
+// Use credentials from file
+var text = fs.readFileSync("./dbconfig.xml").toString('utf-8');
+
+var xmlConfig;
+xmlParser(text, function(err,result){
+  xmlConfig = result.dbconfig;
+});
+
+var config = {
+  host: xmlConfig.host[0],
+  user: xmlConfig.user[0],
+  password: xmlConfig.password[0],
+  database: xmlConfig.database[0],
+  port: xmlConfig.port[0]
+}
+
+// Connect to mysql server
+var dbCon = mysql.createPool(config);
 
 // apply the body-parser middleware to all incoming requests
 app.use(bodyparser());
@@ -118,29 +138,7 @@ app.post('/validate',function(req, res) {
   var formUser = req.body.username;
   var formPass = req.body.password;
 
-  // Connection
-  var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
   console.log("Attempting database connection");
-  dbCon.connect(function (err) {
-    if (err) {
-        throw err;
-    }
-
-    console.log("Connected to database!");
-
     console.log("getAccount");
     dbCon.query('SELECT * FROM tbl_accounts WHERE acc_login = ?', formUser , function (err, rows) {
         if (err) {
@@ -168,37 +166,13 @@ app.post('/validate',function(req, res) {
 	}
 
     });
-   });
-  }); 
- });
 });
 
 app.post('/switchUser',function(req, res) {
   var formId = req.body.id;
 
-  // Connection
-  var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
 
   console.log("Attempting database connection");
-  dbCon.connect(function (err) {
-    if (err) {
-        throw err;
-    }
-
-    console.log("Connected to database!");
-
     console.log("getAccount");
     dbCon.query('SELECT * FROM tbl_accounts WHERE acc_id = ?', formId, function (err, rows) {
         if (err) {
@@ -214,94 +188,42 @@ app.post('/switchUser',function(req, res) {
 	    res.json({status: 'fail'});
 	}
     });
-   });
-  }); 
- });
 });
 
 app.post('/validateUserEdit',function(req, res) {
   var formUser = req.body.username;
   var formPass = req.body.password;
-
-  // Connection
-  var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
+  var formId = req.body.id;
 
   console.log("Attempting database connection");
-  dbCon.connect(function (err) {
-    if (err) {
-        throw err;
-    }
-
-    console.log("Connected to database!");
-
     console.log("getAccount");
-    dbCon.query('SELECT * FROM tbl_accounts WHERE acc_login = ?', formUser , function (err, rows) {
+    dbCon.query('SELECT * FROM tbl_accounts WHERE acc_login = ? AND acc_id = ?', [formUser, formId], function (err, rows) {
         if (err) {
             throw err;
         }
         if (rows.length > 0) {
-	  var numMatches = 0;
-          for (const row of rows) {
-            var accLogin = row.acc_login;
-            var matchUser = (accLogin == formUser);
-            if (matchUser) {
-	      numMatches++;
-	    }
-          }
-	  if (numMatches > 1) {
-	      res.json({status: 'fail'});
-          } else {
               res.json({status: 'success'});
-            }
         } else {
-            res.json({status: 'success'});
+		dbCon.query('SELECT * FROM tbl_accounts WHERE acc_login = ?', formUser, function (err, rows) {
+		  if (err) {
+          	      throw err;
+	          }
+		  if (rows.length >= 1) {
+			res.json({status: 'fail'});
+		  } else {
+			res.json({status: 'success'});
+		  }
+		});
         }
 
     });
-   });
-  }); 
- });
 });
 
 app.post('/validateUser',function(req, res) {
   var formUser = req.body.username;
   var formPass = req.body.password;
 
-  // Connection
-  var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
   console.log("Attempting database connection");
-  dbCon.connect(function (err) {
-    if (err) {
-        throw err;
-    }
-
-    console.log("Connected to database!");
-
     console.log("getAccount");
     dbCon.query('SELECT * FROM tbl_accounts WHERE acc_login = ?', formUser , function (err, rows) {
         if (err) {
@@ -314,16 +236,13 @@ app.post('/validateUser',function(req, res) {
             if (matchUser) {
               res.json({status: 'fail'});
             } else {
-              res.json({status: 'success'});
-            }
+	      res.json({status: 'success'});
+	    }
           }
         } else {
             res.json({status: 'success'});
         }
 
-    });
-   });
-  }); 
  });
 });
 
@@ -332,28 +251,7 @@ app.get('/getSession', function(req, res) {
 });
 
 app.get('/getContacts', function(req, res) {
-  var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
   console.log("Attempting database connection");
-  dbCon.connect(function (err) {
-    if (err) {
-        throw err;
-    }
-
-    console.log("Connected to database!");
-
     console.log("getContacts");
     dbCon.query('SELECT * FROM contact_table ORDER BY contact_category ASC, contact_name ASC', function(err, rows) {
         if (err) {
@@ -396,34 +294,10 @@ app.get('/getContacts', function(req, res) {
 	}
 
     });
-   });
-   });
-  });
 });
 
 app.get('/getAccounts', function(req, res) {
-  var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
   console.log("Attempting database connection");
-  dbCon.connect(function (err) {
-    if (err) {
-        throw err;
-    }
-
-    console.log("Connected to database!");
-
     console.log("getAccounts");
     dbCon.query('SELECT * FROM tbl_accounts', function(err, rows) {
         if (err) {
@@ -445,33 +319,11 @@ app.get('/getAccounts', function(req, res) {
         }
 
     });
-   });
-  }); 
- });
 });
 
 app.post('/postContactEntry', function(req, res) {
     post = req.body;
-
-	var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
       console.log("Attempting database connection");
-      dbCon.connect(function (err) {
-        if (err) {
-            throw err;
-        }
 	
 	const rowToBeInserted = {
           contact_category: post.category,            // replace with acc_name chosen by you OR retain the same value
@@ -493,34 +345,13 @@ app.post('/postContactEntry', function(req, res) {
 	    console.log("Inserted into contact table!");
 
         });
-      });
-   }); 
-  });
   res.redirect(302, '/AllContacts');
 });
 
 app.post('/postUser', function(req, res) {
     post = req.body;
 
-	var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
       console.log("Attempting database connection");
-      dbCon.connect(function (err) {
-        if (err) {
-            throw err;
-        }
 	const saltRounds = 10;
 	const passwordHash = bcrypt.hashSync(post.password, saltRounds);
         
@@ -540,34 +371,13 @@ app.post('/postUser', function(req, res) {
             console.log("Inserted into User table!");
 
         });
-      });
-    }); 
-  });
   res.redirect(302, '/Admin');
 });
 
 app.post('/updateUser', function(req, res) {
     post = req.body;
 
-	var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
       console.log("Attempting database connection");
-      dbCon.connect(function (err) {
-        if (err) {
-            throw err;
-        }
         const saltRounds = 10;
 	var passwordHash;
 	if (post.password != "") {
@@ -588,34 +398,13 @@ app.post('/updateUser', function(req, res) {
 
             });
 	}
-      });
-   }); 
-   });
   res.redirect(302, '/Admin');
 });
 
 app.post('/deleteUser', function(req, res) {
     post = req.body;
 
-	var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
       console.log("Attempting database connection");
-      dbCon.connect(function (err) {
-        if (err) {
-            throw err;
-        }
         
         var id = post.id;
 
@@ -629,9 +418,6 @@ app.post('/deleteUser', function(req, res) {
             console.log("Deleted from User table!");
 
         });
-      });
-    }); 
-  });
   res.redirect(302, '/Admin');
 });
 
@@ -662,26 +448,7 @@ app.post('/upload', (req, res, next) => {
       allContacts.push(induArr);
       allContacts.push(persArr);
 
-
-	var dbConfig;
-  fs.readFile(__dirname + '/dbconfig.xml', function(err, data) {
-        if (err) throw err;
-        parser.parseString(data, function (err, result) {
-            if (err) throw err;
-            dbConfig = result;
-  const dbCon = mysql.createConnection({
-    host: dbConfig.dbconfig.host[0],
-    user: dbConfig.dbconfig.user[0],               // replace with the database user provi>
-    password: dbConfig.dbconfig.password[0],           // replace with the database password provided >
-    database: dbConfig.dbconfig.database[0],           // replace with the database user provi>
-    port: dbConfig.dbconfig.port[0]
-  });
-
       console.log("Attempting database connection");
-      dbCon.connect(function (err) {
-        if (err) {
-            throw err;
-        }
 
 	for (const category of allContacts) {
 	for (const row of category) {
@@ -716,9 +483,6 @@ app.post('/upload', (req, res, next) => {
         });
 	}
 	}
-      });
-      });
-      });
     });
     res.redirect(302, '/AllContacts');
   });
